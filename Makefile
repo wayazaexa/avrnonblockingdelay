@@ -1,20 +1,19 @@
-CC=C:\avr\bin\avr-gcc
-LD=C:\avr\bin\avr-ld
-OBJCOPY="C:\avr\bin\avr-objcopy"
-OBJDUMP="C:\avr\bin\avr-objdump"
-AVRSIZE="C:\avr\bin\avr-size"
-OBJISP="C:\avr\bin\avrdude"
+CC=avr-gcc
+LD=avr-ld
+OBJCOPY=avr-objcopy
+OBJDUMP=avr-objdump
+AVRSIZE=avr-size
+OBJISP=avrdude
 MCU=atmega328p
 CFLAGS=-Wall -Wextra  -Wundef -pedantic \
 		-I C:\avr\avr\include \
 		-Os -std=gnu99 -DF_CPU=16000000UL -mmcu=${MCU}
 LDFLAGS=-mmcu=$(MCU)
-PORT=\\\\.\\COM3
+PORT=/dev/ttyACM0
 BIN=avrdemo
 OUT=${BIN}.hex
 SOURCES = main.c
 
-DEBUG?=1
 
 ifeq ($(DEBUG), 1)
 	OUTPUTDIR=bin/debug
@@ -22,13 +21,11 @@ else
 	OUTPUTDIR=bin/release
 endif
 
-OBJS =  $(addprefix $(OUTPUTDIR)/,$(SOURCES:.c=.o))
+OBJS = $(SOURCES:.c=.o)
 
-all: $(OUTPUTDIR)  $(OUT) 
+all: $(OUT)
 
-$(OBJS): Makefile
-
-$(OUTPUTDIR)/%.o:%.c
+%.o:%.c
 	$(CC) $(CFLAGS) -MD -o $@ -c $<
 
 %.lss: %.elf
@@ -38,20 +35,13 @@ $(OUTPUTDIR)/%.o:%.c
 	$(CC) -Wl,-Map=$(@:.elf=.map) $(LDFLAGS) -o $@ $^
 	$(AVRSIZE) $@
 
-
-$(OBJS):$(SOURCES)
-
 %.hex: %.elf
 	$(OBJCOPY) -O ihex -R .fuse -R .lock -R .user_signatures -R .comment $< $@
 
 isp: ${BIN}.hex
 	$(OBJISP) -F -V -c arduino -p ${MCU} -P ${PORT} -U flash:w:$<
 
-
 clean:
-	del "$(OUT)"  *.map *.P *.d
-
-$(OUTPUTDIR): 
-	@mkdir "$(OUTPUTDIR)"
+	@rm -f "$(OUT)"  *.map *.P *.d *.o
 		   	
 .PHONY: clean dirs
