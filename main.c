@@ -32,59 +32,12 @@
 #define SWITCH_PINLEFT 7
 #define SWITCH_PINRIGHT 6
 
-
-// DDRx   -> pinnen är INPUT eller OUTPUT
-// om output mode
-// ska vi skriva outputen till motsvarade pinne  i PORTx
-// om input mode
-// ska vi LÄSA inputen på  motsvarade pinne  i PINx
-/*
-void mainold(){
-       // DATA DIRECTION REGISTER B
-    BIT_SET(DDRB, LED_PINLEFT); //Sätt led_pin till output mode
-    BIT_SET(DDRB, LED_PINRIGHT); //Sätt led_pin till output mode
-    BIT_SET(DDRB,LED_SWICTCHCLICKER);
-    BIT_CLEAR(DDRD, SWITCH_PINLEFT); // Sätt till input - INPUT_PULLUP
-    BIT_CLEAR(DDRD, SWITCH_PINRIGHT); 
-    BIT_SET(PORTD, SWITCH_PINLEFT); 
-    BIT_SET(PORTD, SWITCH_PINRIGHT); 
- //This means INPUT_PULLUP§
-	// https://forum.arduino.cc/t/using-avr-internal-pull-up-for-push-button-controlling/327729/4
-	// https://www.hackster.io/Hack-star-Arduino/push-buttons-and-arduino-a-simple-guide-wokwi-simulator-c2281f    
-
-    //antalSekunder = 0;
-    // BLOCKING DELAY
-    // POLLING ALGORITM - är vi framme snart?
-    // PRENUMERATION - du göra nåt annat istället för att bara fråga
-    //                      VI KONTAKTAR DIG
-    //                          Interrupt
-    // setup prenumeration .- när nån ändrar på swictehn anropa funktionen onChange
-        while(1){
-            if(BIT_CHECK(PIND,SWITCH_PINLEFT)) // Är switchen  si eller så
-                BIT_SET(PORTB,LED_SWICTCHCLICKER);
-            else
-                BIT_CLEAR(PORTB,LED_SWICTCHCLICKER);
-            // if antalSekunder >= 3
-            //        antalSekunder = 0
-            BIT_SET(PORTB, LED_PINLEFT); 
-            BIT_CLEAR(PORTB, LED_PINRIGHT); 
-            _delay_ms(3000);
-
-            BIT_CLEAR(PORTB, LED_PINLEFT);
-            BIT_SET(PORTB, LED_PINRIGHT); 
-            _delay_ms(3000);
-    }
-}
-*/
-
-
-int main(void)
-{
+int main(void) {
     
     // DATA DIRECTION REGISTER B
     BIT_SET(DDRB, LED_PINLEFT); //Sätt led_pin till output mode
     BIT_SET(DDRB, LED_PINRIGHT); //Sätt led_pin till output mode
-    BIT_SET(DDRB,LED_SWICTCHCLICKER);
+    BIT_SET(DDRB, LED_SWICTCHCLICKER);
     BIT_CLEAR(DDRD, SWITCH_PINLEFT); 
     BIT_CLEAR(DDRD, SWITCH_PINRIGHT); 
     BIT_SET(PORTD, SWITCH_PINLEFT); 
@@ -96,8 +49,9 @@ int main(void)
     millis_init();
     sei();
     
-    volatile millis_t antalMilliSekunderSenasteBytet = 0;
-    bool isleft = true;
+    millis_t antalMilliSekunderSenasteBytet = 0;
+    millis_t current_millis = 0;
+
     BIT_SET(PORTB, LED_PINLEFT);
     BIT_CLEAR(PORTB, LED_PINRIGHT); 
 
@@ -110,36 +64,16 @@ int main(void)
             BIT_CLEAR(PORTB, LED_SWICTCHCLICKER);
         }
 
-        //millis()
-
-
-        //  9522
-        // antalet millisekunder sen processorn resettades (startade/startade om)
-
-        
-        //antalMilliSekunderSenasteBytet = VAD ÄR KLOCKAn vid senaste bytet;
-        //Vad är klockan nu?
-        //skillnaden
-        if( millis_get() - antalMilliSekunderSenasteBytet >= 3000 ) {
+        current_millis = millis_get();
+        if(current_millis - antalMilliSekunderSenasteBytet >= 3000) {
 
             // EXEKVERAS      VAR TREDJE SEKUND
-            if (isleft) {
-                BIT_CLEAR(PORTB, LED_PINLEFT);
-                BIT_SET(PORTB, LED_PINRIGHT); 
-            }
-            else {
-                BIT_SET(PORTB, LED_PINLEFT);
-                BIT_CLEAR(PORTB, LED_PINRIGHT); 
-            }
-            // if(isleft == true)
-            //     isleft = false;
-            // else
-            //     isleft = true;
-            isleft = !isleft;
-            antalMilliSekunderSenasteBytet = millis_get(); // 13122
+            BIT_FLIP(PORTB, LED_PINLEFT);
+            BIT_FLIP(PORTB, LED_PINRIGHT); 
+
+            antalMilliSekunderSenasteBytet = current_millis; // 13122
         }
 
-        
     }
 	return 0;
 }
