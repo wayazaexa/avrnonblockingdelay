@@ -1,15 +1,13 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
-#include <stdio.h>
 #include <stdbool.h>
 #include "millis.h"
-#include "uart.h"
 
-#define BIT_SET(a, b) ((a) |= (1ULL << (b)))
-#define BIT_CLEAR(a,b) ((a) &= ~(1ULL<<(b)))
-#define BIT_FLIP(a,b) ((a) ^= (1ULL<<(b)))
-#define BIT_CHECK(a,b) (!!((a) & (1ULL<<(b)))) 
+#define BIT_SET(a, b) (a |= (1U << b))
+#define BIT_CLEAR(a,b) (a &= ~(1U << b))
+#define BIT_FLIP(a,b) (a ^= (1U << b))
+#define BIT_CHECK(a,b) (!!(a & (1U << b))) 
 
 // NON BLOCKING DELAYS
 // Delays är INTE förbjudet. 
@@ -40,7 +38,7 @@
 // ska vi skriva outputen till motsvarade pinne  i PORTx
 // om input mode
 // ska vi LÄSA inputen på  motsvarade pinne  i PINx
-
+/*
 void mainold(){
        // DATA DIRECTION REGISTER B
     BIT_SET(DDRB, LED_PINLEFT); //Sätt led_pin till output mode
@@ -77,17 +75,11 @@ void mainold(){
             _delay_ms(3000);
     }
 }
-
-
-/*
-Stephanie Hallberg 10:05
-så om man skriver tio tusen rader kod, och använder ett GPL lib för 5 rader, så måste all
- kod skickas om någon frågar?
 */
+
 
 int main(void)
 {
- //   mainold();
     
     // DATA DIRECTION REGISTER B
     BIT_SET(DDRB, LED_PINLEFT); //Sätt led_pin till output mode
@@ -103,7 +95,6 @@ int main(void)
 
     millis_init();
     sei();
-    init_serial();
     
     volatile millis_t antalMilliSekunderSenasteBytet = 0;
     bool isleft = true;
@@ -111,7 +102,7 @@ int main(void)
     BIT_CLEAR(PORTB, LED_PINRIGHT); 
 
     //antalSekunder = 0;
-    while(1){
+    while (1) {
         if(BIT_CHECK(PIND,SWITCH_PINLEFT))
             BIT_SET(PORTB,LED_SWICTCHCLICKER);
         else
@@ -125,14 +116,12 @@ int main(void)
 
         
         //antalMilliSekunderSenasteBytet = VAD ÄR KLOCKAn vid senaste bytet;
-        //Vad äör klockan nu?
+        //Vad är klockan nu?
         //skillnaden
-        if( millis_get() - antalMilliSekunderSenasteBytet > 3000 )
-        {
-            printf("Nu byter vi igen\n");
+        if( millis_get() - antalMilliSekunderSenasteBytet > 3000 ) {
 
             // EXEKVERAS      VAR TREDJE SEKUND
-            if(isleft){
+            if (isleft) {
                 BIT_CLEAR(PORTB, LED_PINLEFT);
                 BIT_SET(PORTB, LED_PINRIGHT); 
             }
