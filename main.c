@@ -5,9 +5,9 @@
 #include "millis.h"
 
 #define BIT_SET(a, b) (a |= (1U << b))
-#define BIT_CLEAR(a,b) (a &= ~(1U << b))
-#define BIT_FLIP(a,b) (a ^= (1U << b))
-#define BIT_CHECK(a,b) (!!(a & (1U << b))) 
+#define BIT_CLEAR(a, b) (a &= ~(1U << b))
+#define BIT_FLIP(a, b) (a ^= (1U << b))
+#define BIT_CHECK(a, b) (a & (1U << b))
 
 // NON BLOCKING DELAYS
 // Delays är INTE förbjudet. 
@@ -103,10 +103,12 @@ int main(void)
 
     //antalSekunder = 0;
     while (1) {
-        if(BIT_CHECK(PIND,SWITCH_PINLEFT))
-            BIT_SET(PORTB,LED_SWICTCHCLICKER);
-        else
-            BIT_CLEAR(PORTB,LED_SWICTCHCLICKER);
+        if (BIT_CHECK(PIND, SWITCH_PINLEFT)) {
+            BIT_SET(PORTB, LED_SWICTCHCLICKER);
+        }
+        else {
+            BIT_CLEAR(PORTB, LED_SWICTCHCLICKER);
+        }
 
         //millis()
 
@@ -118,7 +120,7 @@ int main(void)
         //antalMilliSekunderSenasteBytet = VAD ÄR KLOCKAn vid senaste bytet;
         //Vad är klockan nu?
         //skillnaden
-        if( millis_get() - antalMilliSekunderSenasteBytet > 3000 ) {
+        if( millis_get() - antalMilliSekunderSenasteBytet >= 3000 ) {
 
             // EXEKVERAS      VAR TREDJE SEKUND
             if (isleft) {
